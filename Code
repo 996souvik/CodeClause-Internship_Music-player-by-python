@@ -1,0 +1,72 @@
+import sys
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QPushButton, QLabel, QListWidget, QFileDialog
+from PyQt5.QtGui import QIcon
+from PyQt5.QtMultimedia import QMediaPlayer, QMediaContent
+from PyQt5.QtCore import QUrl
+
+class MusicPlayer(QWidget):
+    def __init__(self):
+        super().__init__()
+
+        self.init_ui()
+
+    def init_ui(self):
+        self.setWindowTitle('Music Player')
+        self.setGeometry(100, 100, 600, 400)
+        self.setWindowIcon(QIcon('icon.png'))  # Replace 'icon.png' with your icon file
+
+        self.player = QMediaPlayer()
+
+        self.playlist = QListWidget(self)
+        self.play_button = QPushButton('▶ Play', self)
+        self.pause_button = QPushButton('|| Pause', self)
+        self.stop_button = QPushButton('■ Stop', self)
+        self.add_button = QPushButton('Add to Playlist', self)
+
+        self.play_button.clicked.connect(self.play_music)
+        self.pause_button.clicked.connect(self.pause_music)
+        self.stop_button.clicked.connect(self.stop_music)
+        self.add_button.clicked.connect(self.add_to_playlist)
+
+        vbox = QVBoxLayout()
+        vbox.addWidget(self.playlist)
+        vbox.addWidget(self.play_button)
+        vbox.addWidget(self.pause_button)
+        vbox.addWidget(self.stop_button)
+        vbox.addWidget(self.add_button)
+
+        self.setLayout(vbox)
+
+    def play_music(self):
+        if self.playlist.currentItem():
+            track_path = self.playlist.currentItem().text()
+            media_content = QMediaContent()
+            media_content.setUrl(QUrl.fromLocalFile(track_path))
+            self.player.setMedia(media_content)
+            self.player.play()
+
+    def pause_music(self):
+        self.player.pause()
+
+    def stop_music(self):
+        self.player.stop()
+
+    def add_to_playlist(self):
+        file_dialog = QFileDialog()
+        file_dialog.setNameFilter("Audio Files (*.mp3 *.wav)")
+        file_dialog.setFileMode(QFileDialog.ExistingFiles)
+
+        if file_dialog.exec_():
+            selected_files = file_dialog.selectedFiles()
+            for file in selected_files:
+                self.playlist.addItem(file)
+
+
+def main():
+    app = QApplication(sys.argv)
+    player = MusicPlayer()
+    player.show()
+    sys.exit(app.exec_())
+
+if __name__ == '__main__':
+    main()
